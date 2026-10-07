@@ -58,6 +58,9 @@ module "codebuild_role" {
 
 # ssm parameter store in shared account
 module "ssm_parameter_store" {
+  providers = {
+    aws = aws.shared
+  }
   source                = "./modules/parameter_store"
   region                = var.region
   bucket_name           = var.bucket_name
