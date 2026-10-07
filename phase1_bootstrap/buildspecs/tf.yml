@@ -1,0 +1,51 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - yum install -y jq || true
+      - echo "Installing Terraform..."
+      - wget -q https://releases.hashicorp.com/terraform/1.13.2/terraform_1.13.2_linux_amd64.zip
+      - unzip -o terraform_1.13.2_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+      - terraform version
+      - aws --version
+      - jq --version
+
+  pre_build:
+    commands:
+      - echo "Current identity"
+      - aws sts get-caller-identity
+      - echo "Assuming tf-runner role..."
+      - CREDS=$(aws sts assume-role --role-arn arn:aws:iam::${SHARED_ACCOUNT_ID}:role/tf-runner --role-session-name codebuild-terraform)
+      - export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
+
+      - echo "Running as tf-runner"
+      - aws sts get-caller-identity
+
+      # Fetching input parameter values from ssm
+      - export TF_VAR_region=$(aws ssm get-parameter --name "/website/infra/region" --query "Parameter.Value" --output text)
+      - export TF_VAR_bucket_name=$(aws ssm get-parameter --name "/website/infra/bucket_name" --query "Parameter.Value" --output text)
+      - export TF_VAR_domain_name=$(aws ssm get-parameter --name "/website/infra/domain_name" --query "Parameter.Value" --output text)
+      - export TF_VAR_www_domain_name=$(aws ssm get-parameter --name "/website/infra/www_domain_name" --query "Parameter.Value" --output text)
+      - export TF_VAR_route53_zone_id=$(aws ssm get-parameter --name "/website/infra/route53_zone_id" --query "Parameter.Value" --output text)
+      - export TF_VAR_dev_account_id=$(aws ssm get-parameter --name "/website/infra/dev_account_id" --query "Parameter.Value" --output text)
+      - export TF_VAR_management_account_id=$(aws ssm get-parameter --name "/website/infra/management_account_id" --query "Parameter.Value" --output text)
+
+  build:
+    commands:
+      - cd phase2_infra
+
+      - terraform init
+
+      - terraform validate
+
+      - terraform plan -out=tfplan
+
+      - terraform apply -auto-approve tfplan
+
+  post_build:
+    commands:
+      - echo "Deployment complete"

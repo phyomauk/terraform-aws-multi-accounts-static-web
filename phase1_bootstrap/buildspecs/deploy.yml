@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - yum install -y jq || true
+
+  build:
+    commands:
+      # assume tf_runner role
+      - CREDS=$(aws sts assume-role --role-arn $TF_RUNNER_ROLE_ARN --role-session-name codebuild)
+      - export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.Credentials.SessionToken')
+      
+      # Assume role into dev account
+      - CREDS=$(aws sts assume-role --role-arn $DEPLOY_ROLE_ARN --role-session-name deploy-session)
+      - export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
+
+      # Deploy to S3
+      - aws s3 sync . s3://$TARGET_BUCKET --delete
+
+      # retrieve the CloudFront distribution ID 
+      - DIST_ID=$(aws ssm get-parameter --name "/website/cloudfront/distribution-id" --query 'Parameter.Value' --output text)
+
+
+      # Invalidate CloudFront
+      - aws cloudfront create-invalidation --distribution-id $DIST_ID --paths "/*"
