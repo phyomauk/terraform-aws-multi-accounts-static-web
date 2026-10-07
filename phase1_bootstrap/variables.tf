@@ -45,7 +45,7 @@ variable "repo_name" {
 
 variable "repo_name_tf" {
   description = "the GitHub repo name of the terraform codes store - prerequisite"
-  default     = "terraform-s3-static-website"
+  default     = "terraform-aws-multi-accounts-static-web"
 }
 
 variable "branch" {
