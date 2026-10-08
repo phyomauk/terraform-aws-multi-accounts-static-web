@@ -1,0 +1,6 @@
+region                = "us-west-1"
+dev_account_id        = 
+management_account_id = 
+shared_account_id     = 
+codeconnections_id    = 
+route53_zone_id       = 

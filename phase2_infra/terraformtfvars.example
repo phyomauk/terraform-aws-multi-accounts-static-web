@@ -1,0 +1,7 @@
+region                = "us-west-1"
+bucket_name           = "s3-static-site-phyomauk"
+domain_name           = "phyomauk.click"
+www_domain_name       = "www.phyomauk.click"
+route53_zone_id       =  
+dev_account_id        =  
+management_account_id =  
