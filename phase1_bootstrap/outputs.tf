@@ -17,3 +17,4 @@ output "codepipeline_role_arn" {
 output "codebuild_role_arn" {
   value = module.codebuild_role.role_arn
 }
+
