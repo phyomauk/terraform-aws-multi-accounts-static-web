@@ -244,7 +244,7 @@ bootstrap/
 ├── CodePipeline Role
 ├── CodeBuild Projects
 ├── CodePipelines
-├── SSM Parameters 
+├── SSM Parameters(TF variables) 
 └── Artifact Bucket
 ```
 
@@ -262,7 +262,7 @@ website-infra/
 ├── CloudFront
 ├── ACM
 ├── Route53
-└── SSM Parameters
+└── SSM Parameter(CloudFront Distribution ID)
 ```
 
 Managed by Terraform.
@@ -301,7 +301,7 @@ Terraform Apply (Bootstrap)
 Create Shared Services Resources
       │
       ├── Artifact Bucket
-      ├── SSM Parameters
+      ├── SSM Parameters(TF variables)
       ├── CodePipeline
       ├── CodeBuild
       ├── CodeBuild-role
