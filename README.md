@@ -1,4 +1,4 @@
-# 🤹‍♂️ AWS Multi-Account Static Website Platform with Terraform & CI/CD
+# 👨‍👩‍👧‍👦 AWS Multi-Accounts and S3 Website Platform with Terraform & CI/CD
 
 ## 📖 Project Overview
 
@@ -19,7 +19,7 @@ The environment consists of three AWS accounts:
 | AWS Account | Purpose |
 |------------|-----------|
 | Management | Identity Center, Route53 Hosted Zones |
-| Shared Services | Terraform backend, CodePipeline, CodeBuild |
+| Shared | Terraform backend, CodePipeline, CodeBuild |
 | Dev | Website Infrastructure |
 
 ---
@@ -122,7 +122,7 @@ graph TB
 | Account | Resources |
 |----------|----------|
 | 🏛️ **Management Account** | • Route53 Hosted Zone<br>• route53-deployer Role |
-| ⚙️ **Shared Services Account** | • Terraform State Backend<br>• CodePipeline<br>• CodeBuild<br>• Artifact Bucket<br>• CloudWatch Logs<br>• tf-runner Role |
+| ⚙️ **Shared Services Account** | • Terraform State Backend<br>• CodePipeline<br>• CodeBuild<br>• Artifact Bucket<br>• CloudWatch Logs<br>• tf-runner Role<br> • Systems Manager Parameter Store |
 | ☁️ **Dev Account** | • S3 Website Bucket<br>• CloudFront Distribution<br>• ACM Certificate<br>• Systems Manager Parameter Store<br>• tf-deployer Role |
 ---
 
@@ -244,6 +244,7 @@ bootstrap/
 ├── CodePipeline Role
 ├── CodeBuild Projects
 ├── CodePipelines
+├── SSM Parameters 
 └── Artifact Bucket
 ```
 
@@ -300,6 +301,7 @@ Terraform Apply (Bootstrap)
 Create Shared Services Resources
       │
       ├── Artifact Bucket
+      ├── SSM Parameters
       ├── CodePipeline
       ├── CodeBuild
       ├── CodeBuild-role
@@ -323,6 +325,9 @@ GitHub Commit (Infrastructure Changes)
        Assume tf-runner
                 │
                 ▼
+      Retrieve SSM Parameters(TF variables)
+                │
+                ▼
  Terraform AssumeRole
                 │
                 ▼
@@ -335,7 +340,7 @@ Create / Update Resources
                 ├── CloudFront
                 ├── ACM
                 ├── Route53
-                └── SSM Parameters
+                └── SSM Parameter(CloudFront Distribution ID)
 ```
 ---
 
@@ -846,6 +851,7 @@ Pipeline deploys:
 
 1. Destroy application infrastructure:
 
+***use shared profile since tf_runner role is owned by shared account***
 ```bash
 cd phase2-infra
 
