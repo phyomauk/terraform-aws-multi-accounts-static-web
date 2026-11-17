@@ -1,4 +1,4 @@
-# 👨‍👩‍👧‍👦 AWS Multi-Accounts and S3 Website Platform with Terraform & CI/CD
+# 👨‍👩‍👧‍👦 AWS Multi-Accounts Infrastructure Platform with Automated CI/CD
 
 ## 📖 Project Overview
 
